@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_labs/lab2/elements/background.dart';
-import 'package:mobile_labs/lab2/elements/custom_text_field.dart';
+import 'package:mobile_labs/lab2/elements/custom_fields/custom_text_field.dart';
+import 'package:mobile_labs/lab2/elements/functions/registration_controller.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -10,9 +11,7 @@ class RegistrationPage extends StatefulWidget {
 }
 
 class RegistrationPageState extends State<RegistrationPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _loginController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final RegistrationController _controller = RegistrationController();
 
   @override
   Widget build(BuildContext context) {
@@ -41,25 +40,23 @@ class RegistrationPageState extends State<RegistrationPage> {
                   ),
                   const SizedBox(height: 20),
                   CustomTextField(
-                    controller: _loginController,
+                    controller: _controller.loginController,
                     labelText: 'Логін',
                   ),
                   const SizedBox(height: 10),
                   CustomTextField(
-                    controller: _emailController,
+                    controller: _controller.emailController,
                     labelText: 'Email',
                   ),
                   const SizedBox(height: 10),
                   CustomTextField(
-                    controller: _passwordController,
+                    controller: _controller.passwordController,
                     labelText: 'Пароль',
                     obscureText: true,
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/home');
-                    },
+                    onPressed: () => _controller.register(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       padding: EdgeInsets.symmetric(
@@ -81,7 +78,7 @@ class RegistrationPageState extends State<RegistrationPage> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/login');
+                      Navigator.pushNamed(context, '/');
                     },
                     child: const Text(
                       'Вже є акаунт? Увійти',

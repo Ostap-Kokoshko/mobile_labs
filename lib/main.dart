@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mobile_labs/lab2/elements/routes.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  const FlutterSecureStorage storage = FlutterSecureStorage();
+  final String? isLoggedIn = await storage.read(key: 'isLoggedIn');
+
+  runApp(MyApp(initialRoute: isLoggedIn == 'true' ? '/home' : '/'));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String initialRoute;
+
+  const MyApp({required this.initialRoute, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +23,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: appTitle,
       theme: ThemeData.dark(),
-      initialRoute: '/registration',
+      initialRoute: initialRoute,
       routes: appRoutes,
     );
   }

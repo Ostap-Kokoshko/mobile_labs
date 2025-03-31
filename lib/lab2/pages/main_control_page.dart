@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_labs/lab2/elements/custom_drawer.dart';
+import 'package:mobile_labs/lab2/elements/custom_fields/custom_drawer.dart';
+import 'package:mobile_labs/lab2/elements/functions/home_controller.dart';
 
-class HomePage extends StatelessWidget {
-  HomePage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final HomeController _controller = HomeController();
 
   @override
   Widget build(BuildContext context) {
@@ -22,16 +29,12 @@ class HomePage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle, color: Colors.white),
-            onPressed: () {
-              Navigator.pushNamed(context, '/profile');
-            },
+            onPressed: () => Navigator.pushNamed(context, '/profile'),
           ),
         ],
         leading: IconButton(
           icon: const Icon(Icons.menu, color: Colors.white),
-          onPressed: () {
-            _scaffoldKey.currentState?.openDrawer();
-          },
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
       ),
       drawer: const CustomDrawer(),
@@ -43,8 +46,8 @@ class HomePage extends StatelessWidget {
               vertical: 20,
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const SizedBox(height: 40),
                 const Text(
                   'Ласкаво просимо до\nSMART LOCK',
                   textAlign: TextAlign.center,
@@ -54,11 +57,11 @@ class HomePage extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 30),
+                _controller.buildInfoCard(context, _toggleLock, _toggleSmoke),
+                const SizedBox(height: 40),
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/profile');
-                  },
+                  onPressed: () => Navigator.pushNamed(context, '/profile'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     padding: EdgeInsets.symmetric(
@@ -80,13 +83,7 @@ class HomePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 TextButton(
-                  onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/login',
-                      (route) => false,
-                    );
-                  },
+                  onPressed: () => _controller.logout(context),
                   child: const Text(
                     'Вийти',
                     style: TextStyle(color: Colors.orange, fontSize: 16),
@@ -98,5 +95,13 @@ class HomePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _toggleLock() {
+    setState(_controller.toggleLock);
+  }
+
+  void _toggleSmoke() {
+    setState(_controller.toggleSmoke);
   }
 }
