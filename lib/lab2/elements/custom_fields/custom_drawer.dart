@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
+
+  Future<void> _logout(BuildContext context) async {
+    const FlutterSecureStorage secureStorage = FlutterSecureStorage();
+    await secureStorage.delete(key: 'isLoggedIn');
+    if (context.mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +60,7 @@ class CustomDrawer extends StatelessWidget {
               'LogOut',
               style: TextStyle(color: Colors.white),
             ),
-            onTap: () {
-              Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-            },
+            onTap: () => _logout(context),
           ),
         ],
       ),

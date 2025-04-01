@@ -4,12 +4,14 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String labelText;
   final bool obscureText;
+  final String? Function(String?)? validator;
 
   const CustomTextField({
     required this.controller,
     required this.labelText,
     super.key,
     this.obscureText = false,
+    this.validator,
   });
 
   @override
@@ -26,6 +28,7 @@ class CustomTextField extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
         ),
       ),
+      validator: validator,
     );
   }
 }
