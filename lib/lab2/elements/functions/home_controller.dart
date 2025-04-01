@@ -1,25 +1,35 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mobile_labs/lab2/elements/functions/home_widgets.dart';
 
 class HomeController {
-  double temperature = 22.5;
-  double humidity = 60.2;
-  bool isLockActive = false;
-  bool isSmokeDetected = false;
+  final _random = Random();
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+
+  final ValueNotifier<double> temperature = ValueNotifier(22.5);
+  final ValueNotifier<double> humidity = ValueNotifier(60.2);
+  final ValueNotifier<bool> isLockActive = ValueNotifier(false);
+  final ValueNotifier<bool> isSmokeDetected = ValueNotifier(false);
+
+  String lockKey = 'isLockActive';
+  String smokeKey = 'isSmokeDetected';
+  String logInKey = 'isLoggedIn';
+
+  Timer? _sensorTimer;
 
   HomeController() {
     _loadPreferences();
+    _startSensorSimulation();
   }
 
   Future<void> _loadPreferences() async {
-    final String? lockStatus = await _secureStorage.read(key: 'isLockActive');
-    final String? smokeStatus =
-    await _secureStorage.read(key: 'isSmokeDetected');
+    final lockStatus = await _secureStorage.read(key: lockKey);
+    final smokeStatus = await _secureStorage.read(key: smokeKey);
 
-    if (lockStatus != null) isLockActive = lockStatus == 'true';
-    if (smokeStatus != null) isSmokeDetected = smokeStatus == 'true';
+    if (lockStatus != null) isLockActive.value = lockStatus == 'true';
+    if (smokeStatus != null) isSmokeDetected.value = smokeStatus == 'true';
   }
 
   Future<void> _savePreference(String key, bool value) async {
@@ -27,22 +37,34 @@ class HomeController {
   }
 
   void toggleLock() {
-    isLockActive = !isLockActive;
-    _savePreference('isLockActive', isLockActive);
+    isLockActive.value = !isLockActive.value;
+    _savePreference(lockKey, isLockActive.value);
   }
 
   void toggleSmoke() {
-    isSmokeDetected = !isSmokeDetected;
-    _savePreference('isSmokeDetected', isSmokeDetected);
+    isSmokeDetected.value = !isSmokeDetected.value;
+    _savePreference(smokeKey, isSmokeDetected.value);
+  }
+
+  void _startSensorSimulation() {
+    _sensorTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      final double tempChange = (_random.nextDouble() - 0.5) * 1.0;
+      temperature.value = (temperature.value + tempChange).clamp(15.0, 30.0);
+
+      final double humidityChange = (_random.nextDouble() - 0.5) * 2.0;
+      humidity.value = (humidity.value + humidityChange).clamp(30.0, 80.0);
+    });
   }
 
   Future<void> logout(BuildContext context) async {
-    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-    await _secureStorage.delete(key: 'isLoggedIn');
+    await _secureStorage.delete(key: logInKey);
+    _sensorTimer?.cancel();
+    if (context.mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+    }
   }
 
   Widget buildInfoCard(
-      BuildContext context,
       VoidCallback onToggleLock,
       VoidCallback onToggleSmoke,
       ) {
@@ -56,40 +78,60 @@ class HomeController {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          buildInfoRow(
-            Icons.thermostat_outlined,
-            'Температура:',
-            '${temperature.toStringAsFixed(1)}°C',
-            Colors.orange,
+          ValueListenableBuilder<double>(
+            valueListenable: temperature,
+            builder: (_, value, __) {
+              return InfoRow(
+                icon: Icons.thermostat_outlined,
+                label: 'Температура:',
+                value: '${value.toStringAsFixed(1)}°C',
+                iconColor: Colors.orange,
+              );
+            },
           ),
           const SizedBox(height: 15),
-          buildInfoRow(
-            Icons.water_drop_outlined,
-            'Вологість:',
-            '${humidity.toStringAsFixed(1)}%',
-            Colors.blue,
+          ValueListenableBuilder<double>(
+            valueListenable: humidity,
+            builder: (_, value, __) {
+              return InfoRow(
+                icon: Icons.water_drop_outlined,
+                label: 'Вологість:',
+                value: '${value.toStringAsFixed(1)}%',
+                iconColor: Colors.blue,
+              );
+            },
           ),
           const SizedBox(height: 15),
-          buildToggleRow(
-            icon: Icons.lock,
-            label: 'Замок:',
-            value: isLockActive,
-            activeText: 'Включений',
-            inactiveText: 'Вимкнений',
-            activeColor: Colors.green,
-            inactiveColor: Colors.red,
-            onToggle: onToggleLock,
+          ValueListenableBuilder<bool>(
+            valueListenable: isLockActive,
+            builder: (_, value, __) {
+              return ToggleRow(
+                icon: Icons.lock,
+                label: 'Замок:',
+                value: value,
+                activeText: 'Включений',
+                inactiveText: 'Вимкнений',
+                activeColor: Colors.green,
+                inactiveColor: Colors.red,
+                onToggle: onToggleLock,
+              );
+            },
           ),
           const SizedBox(height: 15),
-          buildToggleRow(
-            icon: Icons.smoke_free,
-            label: 'Дим:',
-            value: isSmokeDetected,
-            activeText: 'Наявний',
-            inactiveText: 'Відсутній',
-            activeColor: Colors.green,
-            inactiveColor: Colors.red,
-            onToggle: onToggleSmoke,
+          ValueListenableBuilder<bool>(
+            valueListenable: isSmokeDetected,
+            builder: (_, value, __) {
+              return ToggleRow(
+                icon: Icons.smoke_free,
+                label: 'Дим:',
+                value: value,
+                activeText: 'Наявний',
+                inactiveText: 'Відсутній',
+                activeColor: Colors.green,
+                inactiveColor: Colors.red,
+                onToggle: onToggleSmoke,
+              );
+            },
           ),
         ],
       ),

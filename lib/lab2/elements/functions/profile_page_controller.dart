@@ -21,7 +21,7 @@ class ProfileController {
           content: const Text('Ви впевнені, що хочете видалити акаунт?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: Navigator.of(context).pop,
               child: const Text('Скасувати'),
             ),
             TextButton(

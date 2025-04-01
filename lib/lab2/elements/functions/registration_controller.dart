@@ -9,11 +9,11 @@ class RegistrationController {
   final UserStorageSecure _storage = UserStorageSecure();
 
   Future<void> register(BuildContext context) async {
-    final String? emailError =
+    final emailError =
     RegistrationValidation.validateEmail(emailController.text);
-    final String? loginError =
+    final loginError =
     RegistrationValidation.validateLogin(loginController.text);
-    final String? passwordError =
+    final passwordError =
     RegistrationValidation.validatePassword(passwordController.text);
 
     if (emailError != null || loginError != null || passwordError != null) {

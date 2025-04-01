@@ -3,25 +3,31 @@ import 'package:mobile_labs/lab2/storage/user_storage.dart';
 
 class UserStorageSecure implements IUserStorage {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  String emailKey = 'email';
+  String loginKey = 'login';
+  String passwordKey = 'password';
+  String lockKey = 'isLockActive';
+  String smokeKey = 'isSmokeDetected';
+  String loggedInKey = 'isLoggedIn';
 
   @override
   Future<void> saveUserData(String email, String login, String password) async {
-    await _storage.write(key: 'email', value: email);
-    await _storage.write(key: 'login', value: login);
-    await _storage.write(key: 'password', value: password);
+    await _storage.write(key: emailKey, value: email);
+    await _storage.write(key: loginKey, value: login);
+    await _storage.write(key: passwordKey, value: password);
   }
 
   @override
   Future<void> saveUserDataForChange(String email, String login) async {
-    await _storage.write(key: 'email', value: email);
-    await _storage.write(key: 'login', value: login);
+    await _storage.write(key: emailKey, value: email);
+    await _storage.write(key: loginKey, value: login);
   }
 
   @override
   Future<Map<String, String>> getUserData() async {
-    final String? email = await _storage.read(key: 'email');
-    final String? login = await _storage.read(key: 'login');
-    final String? password = await _storage.read(key: 'password');
+    final email = await _storage.read(key: emailKey);
+    final login = await _storage.read(key: loginKey);
+    final password = await _storage.read(key: passwordKey);
     return {
       'email': email ?? '',
       'login': login ?? '',
@@ -31,8 +37,8 @@ class UserStorageSecure implements IUserStorage {
 
   @override
   Future<Map<String, String>> getUserDataForChange() async {
-    final String? email = await _storage.read(key: 'email');
-    final String? login = await _storage.read(key: 'login');
+    final email = await _storage.read(key: emailKey);
+    final login = await _storage.read(key: loginKey);
     return {
       'email': email ?? '',
       'login': login ?? '',
@@ -41,43 +47,43 @@ class UserStorageSecure implements IUserStorage {
 
   @override
   Future<void> clearUserData() async {
-    await _storage.delete(key: 'email');
-    await _storage.delete(key: 'login');
-    await _storage.delete(key: 'password');
+    await _storage.delete(key: emailKey);
+    await _storage.delete(key: loginKey);
+    await _storage.delete(key: passwordKey);
   }
 
   Future<void> saveUserLoginStatus(bool isLoggedIn) async {
     await _storage.write(
-      key: 'isLoggedIn',
+      key: loggedInKey,
       value: isLoggedIn ? 'true' : 'false',
     );
   }
 
   Future<String?> getUserLoginStatus() async {
-    return await _storage.read(key: 'isLoggedIn');
+    return await _storage.read(key: loggedInKey);
   }
 
   Future<void> saveLockState(bool isLockActive) async {
     await _storage.write(
-      key: 'isLockActive',
+      key: lockKey,
       value: isLockActive.toString(),
     );
   }
 
   Future<bool> getLockState() async {
-    final String? lockState = await _storage.read(key: 'isLockActive');
+    final lockState = await _storage.read(key: lockKey);
     return lockState == 'true';
   }
 
   Future<void> saveSmokeState(bool isSmokeDetected) async {
     await _storage.write(
-      key: 'isSmokeDetected',
+      key: smokeKey,
       value: isSmokeDetected.toString(),
     );
   }
 
   Future<bool> getSmokeState() async {
-    final String? smokeState = await _storage.read(key: 'isSmokeDetected');
+    final smokeState = await _storage.read(key: smokeKey);
     return smokeState == 'true';
   }
 }

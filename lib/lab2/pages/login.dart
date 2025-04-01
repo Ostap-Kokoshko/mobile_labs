@@ -61,8 +61,15 @@ class LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () => _controller.login(context,
-                        _loginController, _passwordController, _formKey,),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _controller.login(
+                          context,
+                          _loginController.text,
+                          _passwordController.text,
+                        );
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       padding: EdgeInsets.symmetric(

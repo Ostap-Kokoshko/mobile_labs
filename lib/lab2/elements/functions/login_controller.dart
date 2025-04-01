@@ -5,20 +5,14 @@ class LoginController {
   final UserStorageSecure _storage = UserStorageSecure();
 
   Future<void> login(
-    BuildContext context,
-    TextEditingController loginController,
-    TextEditingController passwordController,
-    GlobalKey<FormState> formKey,
-  ) async {
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
-
+      BuildContext context,
+      String login,
+      String password,
+      ) async {
     final Map<String, String> userData = await _storage.getUserData();
     if (!context.mounted) return;
 
-    if (loginController.text == userData['login'] &&
-        passwordController.text == userData['password']) {
+    if (login == userData['login'] && password == userData['password']) {
       Navigator.pushReplacementNamed(context, '/home');
       await _storage.saveUserLoginStatus(true);
     } else {

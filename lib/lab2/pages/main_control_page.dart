@@ -58,7 +58,32 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                _controller.buildInfoCard(context, _toggleLock, _toggleSmoke),
+
+                ValueListenableBuilder(
+                  valueListenable: _controller.temperature,
+                  builder: (_, __, ___) {
+                    return ValueListenableBuilder(
+                      valueListenable: _controller.humidity,
+                      builder: (_, __, ___) {
+                        return ValueListenableBuilder(
+                          valueListenable: _controller.isLockActive,
+                          builder: (_, __, ___) {
+                            return ValueListenableBuilder(
+                              valueListenable: _controller.isSmokeDetected,
+                              builder: (_, __, ___) {
+                                return _controller.buildInfoCard(
+                                  _toggleLock,
+                                  _toggleSmoke,
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+
                 const SizedBox(height: 40),
                 ElevatedButton(
                   onPressed: () => Navigator.pushNamed(context, '/profile'),
@@ -98,10 +123,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _toggleLock() {
-    setState(_controller.toggleLock);
+    _controller.toggleLock();
   }
 
   void _toggleSmoke() {
-    setState(_controller.toggleSmoke);
+    _controller.toggleSmoke();
   }
 }
