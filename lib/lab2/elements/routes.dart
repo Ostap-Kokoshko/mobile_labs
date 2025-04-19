@@ -6,7 +6,7 @@ import 'package:mobile_labs/lab2/pages/user_profile.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   '/registration': (context) => const RegistrationPage(),
-  '/login': (context) => const LoginPage(),
-  '/home': (context) => HomePage(),
+  '/': (context) => const LoginPage(),
+  '/home': (context) => const HomePage(),
   '/profile': (context) => const ProfilePage(),
 };
