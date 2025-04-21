@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_labs/lab2/elements/buttons/delete_account_button.dart';
 import 'package:mobile_labs/lab2/elements/buttons/profile_logout_button.dart';
+import 'package:mobile_labs/lab2/elements/custom_fields/edit_user_dialog.dart';
+import 'package:mobile_labs/lab2/elements/custom_fields/network_status_bar.dart';
 import 'package:mobile_labs/lab2/elements/functions/profile_page_controller.dart';
 import 'package:mobile_labs/lab2/elements/user_profile_info.dart';
+
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -30,54 +33,22 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  Future<void> _saveUserData() async {
-    await _controller.saveUserData(_email, _login);
-    setState(() {});
+  Future<void> _saveUserData(String login, String email) async {
+    setState(() {
+      _login = login;
+      _email = email;
+    });
+    await _controller.saveUserData(email, login);
   }
 
   void _editUserData() {
     showDialog<void>(
       context: context,
-      builder: (context) {
-        final TextEditingController nameController =
-        TextEditingController(text: _login);
-        final TextEditingController emailController =
-        TextEditingController(text: _email);
-        return AlertDialog(
-          title: const Text('Редагувати профіль'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration:
-                const InputDecoration(labelText: 'Ім\'я користувача'),
-              ),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Скасувати'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _login = nameController.text;
-                  _email = emailController.text;
-                });
-                _saveUserData();
-                Navigator.pop(context);
-              },
-              child: const Text('Зберегти'),
-            ),
-          ],
-        );
-      },
+      builder: (_) => EditUserDialog(
+        login: _login,
+        email: _email,
+        onSave: _saveUserData,
+      ),
     );
   }
 
@@ -97,9 +68,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
@@ -108,36 +77,43 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(paddingValue),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: CircleAvatar(
-                  radius: avatarSize,
-                  backgroundColor: Colors.orange,
-                  child: Icon(
-                    Icons.person,
-                    size: iconSize,
-                    color: Colors.black,
-                  ),
+      body: Column(
+        children: [
+          const NetworkStatusBar(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.all(paddingValue),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: CircleAvatar(
+                        radius: avatarSize,
+                        backgroundColor: Colors.orange,
+                        child: Icon(
+                          Icons.person,
+                          size: iconSize,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    UserInfo(label: "Ім'я користувача:", value: _login),
+                    UserInfo(label: 'Email:', value: _email),
+                    const SizedBox(height: 20),
+                    LogoutButton(screenWidth: screenWidth),
+                    const SizedBox(height: 10),
+                    DeleteAccountButton(
+                      controller: _controller,
+                      screenWidth: screenWidth,
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
-              UserInfo(label: "Ім'я користувача:", value: _login),
-              UserInfo(label: 'Email:', value: _email),
-              const SizedBox(height: 20),
-              LogoutButton(screenWidth: screenWidth),
-              const SizedBox(height: 10),
-              DeleteAccountButton(
-                controller: _controller,
-                screenWidth: screenWidth,
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -1,15 +1,12 @@
-import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mobile_labs/lab2/elements/functions/home_widgets.dart';
 
 class HomeController {
-  final _random = Random();
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
-  final ValueNotifier<double> temperature = ValueNotifier(22.5);
-  final ValueNotifier<double> humidity = ValueNotifier(60.2);
+  final ValueNotifier<double> temperature = ValueNotifier(0);
+  final ValueNotifier<double> humidity = ValueNotifier(0);
   final ValueNotifier<bool> isLockActive = ValueNotifier(false);
   final ValueNotifier<bool> isSmokeDetected = ValueNotifier(false);
 
@@ -17,11 +14,8 @@ class HomeController {
   String smokeKey = 'isSmokeDetected';
   String logInKey = 'isLoggedIn';
 
-  Timer? _sensorTimer;
-
   HomeController() {
     _loadPreferences();
-    _startSensorSimulation();
   }
 
   Future<void> _loadPreferences() async {
@@ -46,19 +40,16 @@ class HomeController {
     _savePreference(smokeKey, isSmokeDetected.value);
   }
 
-  void _startSensorSimulation() {
-    _sensorTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      final double tempChange = (_random.nextDouble() - 0.5) * 1.0;
-      temperature.value = (temperature.value + tempChange).clamp(15.0, 30.0);
+  void updateTemperature(double newValue) {
+    temperature.value = newValue;
+  }
 
-      final double humidityChange = (_random.nextDouble() - 0.5) * 2.0;
-      humidity.value = (humidity.value + humidityChange).clamp(30.0, 80.0);
-    });
+  void updateHumidity(double newValue) {
+    humidity.value = newValue;
   }
 
   Future<void> logout(BuildContext context) async {
     await _secureStorage.delete(key: logInKey);
-    _sensorTimer?.cancel();
     if (context.mounted) {
       Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
     }

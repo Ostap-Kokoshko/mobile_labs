@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mobile_labs/lab2/elements/background.dart';
 import 'package:mobile_labs/lab2/elements/custom_fields/custom_text_field.dart';
 import 'package:mobile_labs/lab2/elements/functions/login_controller.dart';
+import 'package:mobile_labs/lab2/service/internet_service.dart';
 import 'package:mobile_labs/lab2/validation/login_validation.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -62,6 +64,16 @@ class LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
+                      final network =
+                          Provider.of<NetworkProvider>(context, listen: false);
+                      if (!network.isConnected) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Немає підключення до Інтернету'),),
+                        );
+                        return;
+                      }
+
                       if (_formKey.currentState!.validate()) {
                         _controller.login(
                           context,
