@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_labs/lab2/elements/custom_fields/custom_drawer.dart';
+import 'package:mobile_labs/lab2/elements/custom_fields/home_content.dart';
 import 'package:mobile_labs/lab2/elements/functions/home_controller.dart';
+import 'package:mobile_labs/lab2/service/internet_service.dart';
+import 'package:mobile_labs/lab2/service/mqtt_initializer.dart';
+import 'package:mobile_labs/lab2/service/mqtt_service.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,14 +15,48 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final HomeController _controller = HomeController();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _controller = HomeController();
+  late MQTTService _mqttService;
+
+  @override
+  void initState() {
+    super.initState();
+    _mqttService = initMQTT(_controller);
+    _mqttService.connect();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final net = Provider.of<NetworkProvider>(context, listen: false);
+      if (!net.isConnected) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Немає Інтернету. Дані можуть бути застарілими'),
+          ),
+        );
+      }
+    });
+
+    Provider.of<NetworkProvider>(context, listen: false)
+        .addListener(_handleNetworkChange);
+  }
+
+  void _handleNetworkChange() {
+    final network = Provider.of<NetworkProvider>(context, listen: false);
+    network.isConnected
+        ? _mqttService.connect()
+        : _mqttService.mqttDisconnect();
+  }
+
+  @override
+  void dispose() {
+    _mqttService.mqttDisconnect();
+    Provider.of<NetworkProvider>(context, listen: false)
+        .removeListener(_handleNetworkChange);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final Size screenSize = MediaQuery.of(context).size;
-    final bool isTablet = screenSize.width > 600;
-
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -38,95 +77,26 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       drawer: const CustomDrawer(),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isTablet ? screenSize.width * 0.2 : 20,
-              vertical: 20,
-            ),
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
-                const Text(
-                  'Ласкаво просимо до\nSMART LOCK',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 30),
-
-                ValueListenableBuilder(
-                  valueListenable: _controller.temperature,
-                  builder: (_, __, ___) {
-                    return ValueListenableBuilder(
-                      valueListenable: _controller.humidity,
-                      builder: (_, __, ___) {
-                        return ValueListenableBuilder(
-                          valueListenable: _controller.isLockActive,
-                          builder: (_, __, ___) {
-                            return ValueListenableBuilder(
-                              valueListenable: _controller.isSmokeDetected,
-                              builder: (_, __, ___) {
-                                return _controller.buildInfoCard(
-                                  _toggleLock,
-                                  _toggleSmoke,
-                                );
-                              },
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 40),
-                ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/profile'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: EdgeInsets.symmetric(
-                      vertical: 14,
-                      horizontal: isTablet ? 50 : 30,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text(
-                    'Перейти до профілю',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () => _controller.logout(context),
-                  child: const Text(
-                    'Вийти',
-                    style: TextStyle(color: Colors.orange, fontSize: 16),
-                  ),
-                ),
-              ],
+      body: Consumer<NetworkProvider>(
+        builder: (context, network, _) => Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width > 600
+                    ? MediaQuery.of(context).size.width * 0.2
+                    : 20,
+                vertical: 20,
+              ),
+              child: HomeContent(
+                controller: _controller,
+                hasConnection: network.isConnected,
+                onToggleLock: _controller.toggleLock,
+                onToggleSmoke: _controller.toggleSmoke,
+              ),
             ),
           ),
         ),
       ),
     );
-  }
-
-  void _toggleLock() {
-    _controller.toggleLock();
-  }
-
-  void _toggleSmoke() {
-    _controller.toggleSmoke();
   }
 }

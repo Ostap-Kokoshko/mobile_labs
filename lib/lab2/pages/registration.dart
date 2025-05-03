@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile_labs/lab2/elements/background.dart';
 import 'package:mobile_labs/lab2/elements/custom_fields/custom_text_field.dart';
 import 'package:mobile_labs/lab2/elements/functions/registration_controller.dart';
+import 'package:mobile_labs/lab2/service/internet_service.dart';
+import 'package:provider/provider.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -56,7 +58,20 @@ class RegistrationPageState extends State<RegistrationPage> {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () => _controller.register(context),
+                    onPressed: () {
+                      final network =
+                      Provider.of<NetworkProvider>(context, listen: false);
+                      if (!network.isConnected) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Немає підключення до Інтернету'),
+                          ),
+                        );
+                        return;
+                      }
+
+                      _controller.register(context);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       padding: EdgeInsets.symmetric(
