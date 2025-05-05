@@ -5,6 +5,7 @@ import 'package:mobile_labs/lab2/elements/functions/home_controller.dart';
 import 'package:mobile_labs/lab2/service/internet_service.dart';
 import 'package:mobile_labs/lab2/service/mqtt_initializer.dart';
 import 'package:mobile_labs/lab2/service/mqtt_service.dart';
+import 'package:mobile_labs/lab2/service/pressure_service.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -38,6 +39,14 @@ class _HomePageState extends State<HomePage> {
 
     Provider.of<NetworkProvider>(context, listen: false)
         .addListener(_handleNetworkChange);
+
+    PressureService.start((pressure) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Новий тиск: ${pressure.toStringAsFixed(1)} hPa'),
+        ),
+      );
+    });
   }
 
   void _handleNetworkChange() {
@@ -52,6 +61,7 @@ class _HomePageState extends State<HomePage> {
     _mqttService.mqttDisconnect();
     Provider.of<NetworkProvider>(context, listen: false)
         .removeListener(_handleNetworkChange);
+    PressureService.stop();
     super.dispose();
   }
 
