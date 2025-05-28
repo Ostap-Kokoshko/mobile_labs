@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_labs/lab2/elements/functions/profile_page_controller.dart';
 
 class DeleteAccountButton extends StatelessWidget {
-  final ProfileController controller;
   final double screenWidth;
+  final VoidCallback onDelete;
 
   const DeleteAccountButton({
-    required this.controller,
     required this.screenWidth,
+    required this.onDelete,
     super.key,
   });
 
@@ -15,7 +14,7 @@ class DeleteAccountButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ElevatedButton(
-        onPressed: () => controller.deleteAccount(context),
+        onPressed: onDelete,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.red,
           padding: EdgeInsets.symmetric(

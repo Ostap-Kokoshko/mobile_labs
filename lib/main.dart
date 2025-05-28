@@ -10,6 +10,7 @@ void main() async {
   const FlutterSecureStorage storage = FlutterSecureStorage();
   final isLoggedIn = await storage.read(key: 'isLoggedIn');
 
+
   runApp(MyApp(initialRoute: isLoggedIn == 'true' ? '/home' : '/'));
 }
 
