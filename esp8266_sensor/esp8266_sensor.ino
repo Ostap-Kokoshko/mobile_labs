@@ -3,18 +3,10 @@
 #include <DHT.h>
 #include <ArduinoJson.h>
 #include <EEPROM.h>
+#include "secrets.h"
 
 
 // -----------------------------
-// WiFi і MQTT
-const char* ssid = "Ostap";
-const char* password = "Ostap2004";
-
-const char* mqtt_server = "28c5545e26094092b6785f4d24098c1f.s1.eu.hivemq.cloud";
-const int mqtt_port = 8883;
-const char* mqtt_user = "My_Cred";
-const char* mqtt_pass = "MyCred1234";
-
 // MQTT topics
 const char* temp_topic = "home/temperature";
 const char* hum_topic = "home/humidity";
